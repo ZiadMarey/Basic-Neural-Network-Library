@@ -26,6 +26,10 @@ class NeuralNetwork {
         this.learning_rate = 0.1;
     }
 
+    setLearningRate(learning_rate = 0.1) {
+        this.learning_rate = learning_rate;
+    }
+
     feedforward(input){
 
         let inputs = Matrix.fromArray(input)
@@ -36,27 +40,29 @@ class NeuralNetwork {
         hidden.map(sigmoid);
 
         //Generating The Output
-        let output = Matrix.multiply(this.weights_ho,inputs);
+        let output = Matrix.multiply(this.weights_ho,hidden);
         output.add(this.bias_o);
         output.map(sigmoid);
 
+        console.log("feedforward rendered");
         return output.toArray();
 
     }
 
-    train(inputs,targets ){
+    train(input_array,target_array){
         
         //Generating The Hidden Outputs
+        let inputs = Matrix.fromArray(input_array);
         let hidden = Matrix.multiply(this.weights_ih , inputs);
         hidden.add(this.bias_h);
         hidden.map(sigmoid);
 
         //Generating The Output
-        let outputs = Matrix.multiply(this.weights_ho,inputs);
+        let outputs = Matrix.multiply(this.weights_ho,hidden);
         outputs.add(this.bias_o);
         outputs.map(sigmoid);
 
-        targets = Matrix.fromArray(targets);
+        let targets = Matrix.fromArray(target_array);
 
         //Calculate the error in Hidden-Output
         //Error = Targets - Outputs
@@ -65,32 +71,37 @@ class NeuralNetwork {
         //let gradient = output*(1-outputs);
         //Calculate y=m x + b , with m = l_r*gradient*err
 
-        let gradients = Matrix.map(outputs, dsigmoid) //gradient
-        gradients.multiply(output_errors); //error
-        gradients.multiply(this.learning_rate)// l_r
+        let output_gradients = Matrix.map(outputs, dsigmoid) //gradient
+        output_gradients.multiply(output_errors); //error
+        output_gradients.multiply(this.learning_rate)// l_r
 
+        
         //Calculate the x (which is hidden transposed) then * m
         let hidden_T = Matrix.transpose(hidden);
-        let weights_ho_deltas = Matrix.multiply(gradients, hidden_T) 
+        let weights_ho_deltas = Matrix.multiply(output_gradients, hidden_T) 
         
+        //Adjust the weights by deltas
         this.weights_ho.add(weights_ho_deltas);
+        //Calculate the bias (which is just the gradient)
+        this.bias_o.add(output_gradients);
 
 
-        let weight_ho_t = Matrix.transpose(this.weights_ho);
-        let hidden_errors = Matrix.multiply(weight_ho_t, output_errors);
+
+        let weights_ho_t = Matrix.transpose(this.weights_ho);
+        let hidden_errors = Matrix.multiply(weights_ho_t, output_errors);
         
         //Calculate the error in Input-Hidden
-        let hidden_gradient = Matrix.map(hidden,dsigmoid);
-        hidden_gradient.multiply(hidden_errors);
-        hidden_gradient.multiply(this.learning_rate);
+        let hidden_gradients = Matrix.map(hidden,dsigmoid);
+        hidden_gradients.multiply(hidden_errors);
+        hidden_gradients.multiply(this.learning_rate);
 
         let inputs_T = Matrix.transpose(inputs);
-        let weights_ih_deltas = Matrix.multiply(hidden_gradient,inputs_T);
+        let weights_ih_deltas = Matrix.multiply(hidden_gradients,inputs_T);
 
+        //Adjust the weights by deltas
         this.weights_ih.add(weights_ih_deltas);
+        //Calculate the bias (which is just the gradient)
+        this.bias_h.add(hidden_gradients);
 
-        // outputs.print();
-        // targets.print();
-        // error.print();
     }
 }
