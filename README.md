@@ -6,13 +6,10 @@ This is a very basic Javascript Neural Network library based on the one built by
 ## Features
 
 - Neural Network with variable amounts of inputs, hidden nodes and outputs
-- Multiple hidden layers
-- Activation functions: Sigmoid, Tanh, ReLu
+- Activation functions
 - Adjustable learning rate
 - Fully connected
-- Support for genetic algorithms: copy-, mutate-, and merge-functionality
-- Save the weights and biases of a NN to a JSON-file
-- Generate a NeuralNetwork-object from a JSON-file
+
 
 ## Use the library
 
